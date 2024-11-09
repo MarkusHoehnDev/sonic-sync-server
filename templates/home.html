@@ -29,11 +29,11 @@
         <h1>Welcome {{ session.userinfo.name }}!</h1>
         <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
         <div>
-            <script>
+            <!-- <script>
             function updateUser(){
                 UserIDInterface.getUserID({{ pretty.sub }})
             }
-            </script>
+            </script> -->
             <pre id = "pretty">{{ pretty }}</pre></div>
 
         {% if not spotify_token %}
@@ -65,6 +65,7 @@
 
         socket.on("update_active_users", (activeUsers) => {
             const activeUsersDiv = document.getElementById("active-users");
+            activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
 
             activeUsers.forEach((user) => {
                 const userDiv = document.createElement("div");
@@ -78,8 +79,14 @@
                 img.height = 50;
 
                 const userInfoDiv = document.createElement("div");
+                
+                // Display Name and Sub Value
                 const displayName = document.createElement("p");
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
+                
+                const subValue = document.createElement("p");
+                subValue.innerHTML = `<small>Sub: ${user.sub}</small>`;  // Add sub value here
+                
                 const email = document.createElement("p");
                 email.textContent = user.email;
 
@@ -88,11 +95,13 @@
                 trackInfoDiv.id = `track-info-${user.user_id}`;
 
                 userInfoDiv.appendChild(displayName);
+                userInfoDiv.appendChild(subValue);  // Append the sub value to the user info
                 userInfoDiv.appendChild(email);
                 userInfoDiv.appendChild(trackInfoDiv);
+                
                 userDiv.appendChild(img);
                 userDiv.appendChild(userInfoDiv);
-
+                
                 activeUsersDiv.appendChild(userDiv);
 
                 setInterval(() => {
