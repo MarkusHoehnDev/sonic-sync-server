@@ -60,6 +60,7 @@ def home():
             spotify_profile = response.json()
             user_id = spotify_profile.get("id")
             if user_id:
+                print(user) # Debugging
                 active_spotify_users[user_id] = {
                     "sub": user["sub"],
                     "user_id": user_id,
