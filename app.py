@@ -5,9 +5,10 @@ from urllib.parse import quote_plus, urlencode
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask, redirect, render_template, session, url_for, request, make_response
+from flask import Flask, redirect, render_template, session, url_for, request, make_response, jsonify
 from flask_socketio import SocketIO, emit
 
+# Load environment variables
 ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
@@ -15,8 +16,8 @@ if ENV_FILE:
 app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
 
+# Initialize SocketIO and OAuth
 socketio = SocketIO(app, cors_allowed_origins="*")
-
 oauth = OAuth(app)
 
 # Register Auth0
@@ -36,12 +37,10 @@ oauth.register(
     client_id=env.get("SPOTIFY_CLIENT_ID"),
     client_secret=env.get("SPOTIFY_CLIENT_SECRET"),
     access_token_url="https://accounts.spotify.com/api/token",
-    access_token_params=None,
     authorize_url="https://accounts.spotify.com/authorize",
-    authorize_params=None,
     api_base_url="https://api.spotify.com/v1/",
     client_kwargs={
-        "scope": "user-read-email user-read-private",  # Adjust scopes as needed
+        "scope": "user-read-email user-read-private user-read-playback-state",  # Adjust scopes as needed
     },
 )
 
@@ -63,15 +62,18 @@ def home():
             user_id = spotify_profile.get("id")
             if user_id:
                 active_spotify_users[user_id] = {
+                    "user_id": user_id,
                     "display_name": spotify_profile.get("display_name"),
                     "email": spotify_profile.get("email"),
                     "image_url": spotify_profile.get("images")[0]["url"] if spotify_profile.get("images") else None,
-                    "last_active": time.time()
+                    "last_active": time.time(),
+                    "spotify_token": spotify_token  # Store the token for each user
                 }
 
-    # Prepare the list of active Spotify profiles
+    # Prepare the list of active Spotify profiles with user_id
     active_profiles = [
         {
+            "user_id": uid,
             "display_name": profile["display_name"],
             "email": profile["email"],
             "image_url": profile["image_url"]
@@ -85,7 +87,7 @@ def home():
         pretty=json.dumps(user, indent=4) if user else None,
         spotify_token=spotify_token,
         spotify_profile=spotify_profile,
-        active_profiles=active_profiles  # Pass active profiles to template
+        active_profiles=active_profiles
     )
 
 # Auth0 Callback
@@ -105,7 +107,6 @@ def login():
 # Logout from Auth0
 @app.route("/logout")
 def logout():
-    # Remove from active Spotify users if logged in
     spotify_token = session.get("spotify_token")
     if spotify_token:
         response = oauth.spotify.get("me", token=spotify_token)
@@ -145,6 +146,48 @@ def spotify_callback():
     session["spotify_token"] = token
     return redirect(url_for("home"))
 
+@socketio.on('find_tracks')
+def handle_find_tracks(data):
+    user_id = data.get('user_id')
+
+    # Ensure user_id is in active Spotify users and retrieve the associated token
+    user_data = active_spotify_users.get(user_id)
+    if user_data and "spotify_token" in user_data:
+        spotify_token = user_data["spotify_token"]
+
+        # Request currently playing track for the specific user using their token
+        response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
+        
+        if response.ok:
+            track_data = response.json()
+            
+            # Check if there's an item (track) currently playing
+            if track_data and track_data.get("item"):
+                track_info = track_data["item"]
+                song_name = track_info.get("name")
+                artist_name = ", ".join([artist["name"] for artist in track_info.get("artists", [])])
+                album_image = track_info["album"]["images"][0]["url"] if track_info["album"].get("images") else None
+
+                # Print and emit the track information back to the client, including user_id
+                track_info_data = {
+                    "user_id": user_id,
+                    "song_name": song_name,
+                    "artist_name": artist_name,
+                    "album_image": album_image
+                }
+                print("Emitting track_info for user:", track_info_data)  # Debugging statement
+                emit("track_info", track_info_data)
+            else:
+                print("Emitting track_info: No track currently playing for user", user_id)  # Debugging statement
+                emit("track_info", {"user_id": user_id, "error": "No track currently playing"})
+        else:
+            print("Emitting track_info: Failed to retrieve currently playing track for user", user_id)  # Debugging statement
+            emit("track_info", {"user_id": user_id, "error": "Failed to retrieve currently playing track"})
+    else:
+        print("Emitting track_info: User not active or Spotify token missing for user", user_id)  # Debugging statement
+        emit("track_info", {"user_id": user_id, "error": "User not active or Spotify token missing"})
+
+
 @socketio.on('gps_data')
 def handle_gps_data(data):
     """
@@ -171,13 +214,14 @@ def handle_gps_data(data):
         user_gps_data[received_user_id] = []
 
     # Append GPS data
-    user_gps_data[received_user_id].append({
+    gps_data_entry = {
         "latitude": latitude,
         "longitude": longitude,
         "timestamp": timestamp
-    })
+    }
+    user_gps_data[received_user_id].append(gps_data_entry)
+    print("Received GPS data:", gps_data_entry)  # Debugging statement
 
 if __name__ == "__main__":
-    # You can use a background thread or a scheduler like APScheduler for cleanup
-    # For simplicity, we'll skip implementing the cleanup here
+    # Run the app with SocketIO support
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
