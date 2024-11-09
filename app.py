@@ -211,7 +211,8 @@ def handle_gps_data(data):
     gps_data_entry = {
         "latitude": latitude,
         "longitude": longitude,
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "received_user_id": received_user_id
     }
     user_gps_data[received_user_id].append(gps_data_entry)
     print("Received GPS data:", gps_data_entry) 
