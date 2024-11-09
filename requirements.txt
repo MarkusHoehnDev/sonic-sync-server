@@ -6,3 +6,4 @@ authlib>=1.0
 requests>=2.27.1
 gunicorn==23.0.0
 Flask-SocketIO==5.4.1
+eventlet==0.37.0
