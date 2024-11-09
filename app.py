@@ -45,7 +45,7 @@ oauth.register(
 )
 
 user_gps_data = {}
-active_spotify_users = {}  # Dictionary to track active Spotify users
+active_spotify_users = {}  
 
 @app.route("/")
 def home():
@@ -179,5 +179,40 @@ def handle_find_tracks(data):
                     "album_image": album_image
                 })
                 
+
+@socketio.on('gps_data')
+def handle_gps_data(data):
+    """
+    Handle incoming GPS data from clients.
+    Expected data format (JSON):
+    {
+        "user_id": "<string>", # should be the "sub" value
+        "latitude": <float>,
+        "longitude": <float>,
+        "timestamp": <string or int>
+    }
+    """
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    timestamp = data.get('timestamp')
+    received_user_id = data.get('user_id')
+    
+    # Ensure latitude, longitude, and timestamp are present
+    if latitude is None or longitude is None or timestamp is None:
+        return
+
+    # Initialize GPS data storage if it does not exist
+    if received_user_id not in user_gps_data:
+        user_gps_data[received_user_id] = []
+
+    # Append GPS data
+    gps_data_entry = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "timestamp": timestamp
+    }
+    user_gps_data[received_user_id].append(gps_data_entry)
+    print("Received GPS data:", gps_data_entry)  # Debugging statement
+
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
