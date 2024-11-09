@@ -120,40 +120,32 @@ def handle_gps_data(data):
     Handle incoming GPS data from clients.
     Expected data format (JSON):
     {
-        "user_id": "<string>",
+        "user_id": "<string>", # should be the "sub" vlaue
         "latitude": <float>,
         "longitude": <float>,
         "timestamp": <string or int>
     }
     """
-    received_user_id = data.get('user_id')
-    authenticated_user = session.get("user")
-    
-    if not authenticated_user:
-        return
-    
-    session_user_id = authenticated_user.get('sub')
-    
-    if received_user_id != session_user_id:
-        return
-    
     latitude = data.get('latitude')
     longitude = data.get('longitude')
     timestamp = data.get('timestamp')
-
+    received_user_id = data.get('user_id')
+    
+    # Ensure latitude, longitude, and timestamp are present
     if latitude is None or longitude is None or timestamp is None:
         return
 
-    if session_user_id not in user_gps_data:
-        user_gps_data[session_user_id] = []
-    
-    user_gps_data[session_user_id].append({
+    # Initialize GPS data storage if it does not exist
+    if received_user_id not in user_gps_data:
+        user_gps_data[received_user_id] = []
+
+    # Append GPS data
+    user_gps_data[received_user_id].append({
         "latitude": latitude,
         "longitude": longitude,
         "timestamp": timestamp
     })
 
-    # Perform any additional logic with the GPS data as needed
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
