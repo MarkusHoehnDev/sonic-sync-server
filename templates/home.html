@@ -59,7 +59,6 @@
 
         socket.on("update_active_users", (activeUsers) => {
             const activeUsersDiv = document.getElementById("active-users");
-            activeUsersDiv.innerHTML = "";
 
             activeUsers.forEach((user) => {
                 const userDiv = document.createElement("div");
@@ -81,7 +80,6 @@
                 const trackInfoDiv = document.createElement("div");
                 trackInfoDiv.className = "track-info";
                 trackInfoDiv.id = `track-info-${user.user_id}`;
-                trackInfoDiv.innerHTML = "<p><em>Loading current track...</em></p>";
 
                 userInfoDiv.appendChild(displayName);
                 userInfoDiv.appendChild(email);

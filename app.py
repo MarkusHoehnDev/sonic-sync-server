@@ -178,12 +178,6 @@ def handle_find_tracks(data):
                     "artist_name": artist_name,
                     "album_image": album_image
                 })
-            else:
-                emit("track_info", {"user_id": user_id, "error": "No track currently playing"})
-        else:
-            emit("track_info", {"user_id": user_id, "error": "Failed to retrieve currently playing track"})
-    else:
-        emit("track_info", {"user_id": user_id, "error": "User not active or Spotify token missing"})
-
+                
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
