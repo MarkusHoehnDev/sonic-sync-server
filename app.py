@@ -61,7 +61,7 @@ def home():
             user_id = spotify_profile.get("id")
             if user_id:
                 active_spotify_users[user_id] = {
-                    "sub": json.dumps(user, indent=4)["sub"],
+                    "sub": user["sub"],
                     "user_id": user_id,
                     "display_name": spotify_profile.get("display_name"),
                     "email": spotify_profile.get("email"),
