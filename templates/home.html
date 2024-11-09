@@ -29,11 +29,11 @@
         <h1>Welcome {{ session.userinfo.name }}!</h1>
         <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
         <div>
-            <!-- <script>
-            function updateUser(){
-                UserIDInterface.getUserID({{ pretty.sub }})
-            }
-            </script> -->
+            <script>
+                function updateUser(){
+                    UserIDInterface.getUserID("{{ pretty.userinfo.sub }}");
+                }
+            </script>            
             <pre id = "pretty">{{ pretty }}</pre></div>
 
         {% if not spotify_token %}
