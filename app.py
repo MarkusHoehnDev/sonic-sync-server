@@ -77,7 +77,7 @@ def home():
         pretty=json.dumps(user, indent=4) if user else None,
         spotify_token=spotify_token,
         spotify_profile=spotify_profile,
-        sub=user['userinfo']['sub']
+        sub=user['userinfo']['sub'] if user else None
     )
 
 @socketio.on('connect')
