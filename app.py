@@ -212,7 +212,7 @@ def handle_gps_data(data):
         "timestamp": timestamp
     }
     user_gps_data[received_user_id].append(gps_data_entry)
-    print("Received GPS data:", gps_data_entry)  # Debugging statement
+    print("Received GPS data:", gps_data_entry) 
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
