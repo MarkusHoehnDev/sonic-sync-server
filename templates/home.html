@@ -78,7 +78,7 @@
 
     <script>
         // Connect to Socket.IO with explicit server URL
-        const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com");
+        const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
 
         // Function to fetch and display track info for each active user
         function fetchTrackInfo(userId) {

@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
 
 # Initialize SocketIO and OAuth
-socketio = SocketIO(app, cors_allowed_origins=["https://sonic-sync-78daad0a1d18.herokuapp.com"])
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", transports=["websocket"])
 oauth = OAuth(app)
 
 # Register Auth0
@@ -159,7 +159,7 @@ def handle_find_tracks(data):
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
         print("Spotify response status:", response.status_code)  # Check status code
         print("Spotify response text:", response.text)
-        
+
         if response.ok:
             track_data = response.json()
             
