@@ -97,7 +97,8 @@ def get_active_user_list():
             "user_id": uid,
             "display_name": profile["display_name"],
             "email": profile["email"],
-            "image_url": profile["image_url"]
+            "image_url": profile["image_url"],
+            "sub": profile["sub"]
         }
         for uid, profile in active_spotify_users.items()
     ]
