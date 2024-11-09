@@ -7,7 +7,7 @@ from urllib.parse import quote_plus, urlencode
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask, redirect, render_template, session, url_for, request, jsonify
 
 ENV_FILE = find_dotenv()
 if ENV_FILE:
@@ -70,6 +70,12 @@ def logout():
         )
     )
 
+
+@app.route("/gps", methods=["POST"])
+def index():
+    data = request.get_json()
+    print(data)
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=env.get("PORT", 3000))
