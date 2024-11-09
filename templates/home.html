@@ -61,7 +61,7 @@
                                 <p>{{ profile.email }}</p>
                                 <!-- Track Info Placeholder -->
                                 <div class="track-info" id="track-info-{{ profile.user_id }}">
-                                    <p>Loading current track...</p>
+                                    <p><em>Loading current track...</em></p>  <!-- Updated loading indicator -->
                                 </div>
                             </div>
                         </div>
@@ -77,7 +77,8 @@
     {% endif %}
 
     <script>
-        const socket = io('https://sonic-sync-78daad0a1d18.herokuapp.com');
+        // Connect to Socket.IO with explicit server URL
+        const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com");
 
         // Function to fetch and display track info for each active user
         function fetchTrackInfo(userId) {
@@ -88,9 +89,10 @@
         socket.on('track_info', (data) => {
             const userId = data.user_id;
             const trackInfoDiv = document.getElementById(`track-info-${userId}`);
-            
+
             if (data.error) {
                 trackInfoDiv.innerHTML = `<p>${data.error}</p>`;
+                console.error("Track info error:", data.error);  // Log error details
             } else {
                 const trackHtml = `
                     <p><strong>Currently Playing:</strong></p>
