@@ -51,11 +51,20 @@ user_gps_data = {}
 def home():
     user = session.get("user")
     spotify_token = session.get("spotify_token")
+
+    spotify_profile = None
+
+    if spotify_token:
+        response = oauth.spotify.get("me", token=spotify_token)
+        if response.ok:
+            spotify_profile = response.json()
+
     return render_template(
         "home.html",
         session=user,
         pretty=json.dumps(user, indent=4) if user else None,
-        spotify_token=spotify_token
+        spotify_token=spotify_token,
+        spotify_profile=spotify_profile
     )
 
 # Auth0 Callback
@@ -104,15 +113,6 @@ def spotify_callback():
     token = oauth.spotify.authorize_access_token()
     session["spotify_token"] = token
     return redirect(url_for("home"))
-
-# Optionally, you can add a route to refresh Spotify token if needed
-# @app.route("/refresh_spotify")
-# def refresh_spotify():
-#     token = session.get("spotify_token")
-#     if token and oauth.spotify.token_updater:
-#         new_token = oauth.spotify.refresh_token(...)
-#         session["spotify_token"] = new_token
-#     return redirect(url_for("home"))
 
 @socketio.on('gps_data')
 def handle_gps_data(data):
