@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
 
 # Initialize SocketIO and OAuth
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", transports=["websocket"])
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", transports=["websocket"])
 oauth = OAuth(app)
 
 # Register Auth0
