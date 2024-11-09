@@ -1,16 +1,29 @@
+<!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8" />
-    <title>Auth0 Example</title>
-  </head>
-  <body>
+    <title>Auth0 and Spotify Integration Example</title>
+</head>
+<body>
     {% if session %}
-    <h1>Welcome {{session.userinfo.name}}!</h1>
-    <p><a href="/logout" id="qsLogoutBtn">Logout</a></p>
-    <div><pre>{{pretty}}</pre></div>
+        <h1>Welcome {{ session.userinfo.name }}!</h1>
+        <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
+        <div><pre>{{ pretty }}</pre></div>
+
+        {% if not spotify_token %}
+            <p><a href="{{ url_for('spotify_login') }}">Connect with Spotify</a></p>
+        {% else %}
+            <p>Spotify is connected.</p>
+            {% set spotify_user = spotify_token.get('userinfo') %}
+            {% if spotify_user %}
+                <h2>Spotify Profile</h2>
+                <p>Name: {{ spotify_user.display_name }}</p>
+                <p>Email: {{ spotify_user.email }}</p>
+            {% endif %}
+        {% endif %}
     {% else %}
-    <h1 id="profileDropDown">Welcome Guest</h1>
-    <p><a href="/login" id="qsLoginBtn">Login</a></p>
+        <h1 id="profileDropDown">Welcome Guest</h1>
+        <p><a href="{{ url_for('login') }}" id="qsLoginBtn">Login</a></p>
     {% endif %}
-  </body>
+</body>
 </html>

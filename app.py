@@ -1,10 +1,11 @@
 import json
+import time
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask, redirect, render_template, session, url_for, request, make_response
 from flask_socketio import SocketIO
 
 ENV_FILE = find_dotenv()
@@ -18,6 +19,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 oauth = OAuth(app)
 
+# Register Auth0
 oauth.register(
     "auth0",
     client_id=env.get("AUTH0_CLIENT_ID"),
@@ -28,29 +30,49 @@ oauth.register(
     server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration',
 )
 
+# Register Spotify
+oauth.register(
+    "spotify",
+    client_id=env.get("SPOTIFY_CLIENT_ID"),
+    client_secret=env.get("SPOTIFY_CLIENT_SECRET"),
+    access_token_url="https://accounts.spotify.com/api/token",
+    access_token_params=None,
+    authorize_url="https://accounts.spotify.com/authorize",
+    authorize_params=None,
+    api_base_url="https://api.spotify.com/v1/",
+    client_kwargs={
+        "scope": "user-read-email user-read-private",  # Adjust scopes as needed
+    },
+)
+
 user_gps_data = {}
 
 @app.route("/")
 def home():
     user = session.get("user")
+    spotify_token = session.get("spotify_token")
     return render_template(
         "home.html",
         session=user,
         pretty=json.dumps(user, indent=4) if user else None,
+        spotify_token=spotify_token
     )
 
+# Auth0 Callback
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
     token = oauth.auth0.authorize_access_token()
     session["user"] = token
-    return redirect("/")
+    return redirect(url_for("spotify_login"))
 
+# Initiate Auth0 Login
 @app.route("/login")
 def login():
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("callback", _external=True)
     )
 
+# Logout from Auth0
 @app.route("/logout")
 def logout():
     session.clear()
@@ -67,6 +89,30 @@ def logout():
         )
     )
 
+# Initiate Spotify Login
+@app.route("/spotify-login")
+def spotify_login():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return oauth.spotify.authorize_redirect(
+        redirect_uri=env.get("SPOTIFY_REDIRECT_URI")
+    )
+
+# Spotify Callback
+@app.route("/spotify-callback")
+def spotify_callback():
+    token = oauth.spotify.authorize_access_token()
+    session["spotify_token"] = token
+    return redirect(url_for("home"))
+
+# Optionally, you can add a route to refresh Spotify token if needed
+# @app.route("/refresh_spotify")
+# def refresh_spotify():
+#     token = session.get("spotify_token")
+#     if token and oauth.spotify.token_updater:
+#         new_token = oauth.spotify.refresh_token(...)
+#         session["spotify_token"] = new_token
+#     return redirect(url_for("home"))
 
 @socketio.on('gps_data')
 def handle_gps_data(data):
@@ -97,7 +143,7 @@ def handle_gps_data(data):
 
     if latitude is None or longitude is None or timestamp is None:
         return
-    
+
     if session_user_id not in user_gps_data:
         user_gps_data[session_user_id] = []
     
@@ -107,7 +153,7 @@ def handle_gps_data(data):
         "timestamp": timestamp
     })
 
-    # do some logic with the dictionary of GPS data
+    # Perform any additional logic with the GPS data as needed
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
