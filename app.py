@@ -6,7 +6,7 @@ from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, redirect, render_template, session, url_for, request, make_response
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
 ENV_FILE = find_dotenv()
 if ENV_FILE:
@@ -46,6 +46,7 @@ oauth.register(
 )
 
 user_gps_data = {}
+active_spotify_users = {}  # Dictionary to track active Spotify users
 
 @app.route("/")
 def home():
@@ -58,13 +59,33 @@ def home():
         response = oauth.spotify.get("me", token=spotify_token)
         if response.ok:
             spotify_profile = response.json()
+            # Add to active users
+            user_id = spotify_profile.get("id")
+            if user_id:
+                active_spotify_users[user_id] = {
+                    "display_name": spotify_profile.get("display_name"),
+                    "email": spotify_profile.get("email"),
+                    "image_url": spotify_profile.get("images")[0]["url"] if spotify_profile.get("images") else None,
+                    "last_active": time.time()
+                }
+
+    # Prepare the list of active Spotify profiles
+    active_profiles = [
+        {
+            "display_name": profile["display_name"],
+            "email": profile["email"],
+            "image_url": profile["image_url"]
+        }
+        for uid, profile in active_spotify_users.items()
+    ]
 
     return render_template(
         "home.html",
         session=user,
         pretty=json.dumps(user, indent=4) if user else None,
         spotify_token=spotify_token,
-        spotify_profile=spotify_profile
+        spotify_profile=spotify_profile,
+        active_profiles=active_profiles  # Pass active profiles to template
     )
 
 # Auth0 Callback
@@ -84,6 +105,16 @@ def login():
 # Logout from Auth0
 @app.route("/logout")
 def logout():
+    # Remove from active Spotify users if logged in
+    spotify_token = session.get("spotify_token")
+    if spotify_token:
+        response = oauth.spotify.get("me", token=spotify_token)
+        if response.ok:
+            spotify_profile = response.json()
+            user_id = spotify_profile.get("id")
+            if user_id and user_id in active_spotify_users:
+                del active_spotify_users[user_id]
+
     session.clear()
     return redirect(
         "https://"
@@ -120,7 +151,7 @@ def handle_gps_data(data):
     Handle incoming GPS data from clients.
     Expected data format (JSON):
     {
-        "user_id": "<string>", # should be the "sub" vlaue
+        "user_id": "<string>", # should be the "sub" value
         "latitude": <float>,
         "longitude": <float>,
         "timestamp": <string or int>
@@ -146,6 +177,7 @@ def handle_gps_data(data):
         "timestamp": timestamp
     })
 
-
 if __name__ == "__main__":
+    # You can use a background thread or a scheduler like APScheduler for cleanup
+    # For simplicity, we'll skip implementing the cleanup here
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))

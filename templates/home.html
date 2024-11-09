@@ -3,6 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <title>SonicSync</title>
+    <style>
+        .active-user {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .active-user img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     {% if session %}
@@ -23,6 +36,26 @@
                 {% if spotify_profile.images and spotify_profile.images[0] %}
                     <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="100" height="100">
                 {% endif %}
+            {% endif %}
+
+            <!-- Active Spotify Users Section -->
+            <h2>Active Spotify Users</h2>
+            {% if active_profiles %}
+                {% for profile in active_profiles %}
+                    <div class="active-user">
+                        {% if profile.image_url %}
+                            <img src="{{ profile.image_url }}" alt="{{ profile.display_name }}" width="50" height="50">
+                        {% else %}
+                            <img src="default_profile.png" alt="Default Profile" width="50" height="50">
+                        {% endif %}
+                        <div>
+                            <p><strong>{{ profile.display_name }}</strong></p>
+                            <p>{{ profile.email }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No active Spotify users at the moment.</p>
             {% endif %}
         {% endif %}
     {% else %}
