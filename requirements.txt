@@ -5,3 +5,4 @@ python-dotenv>=0.19.2
 authlib>=1.0
 requests>=2.27.1
 gunicorn==23.0.0
+Flask-SocketIO==5.4.1
