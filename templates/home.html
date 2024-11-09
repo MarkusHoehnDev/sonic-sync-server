@@ -25,96 +25,64 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
-    {% if session %}
-        <h1>Welcome {{ session.userinfo.name }}!</h1>
-        <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
-        <div><pre>{{ pretty }}</pre></div>
+    <h1>Welcome to SonicSync!</h1>
+    <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
+    <p id="connectSpotify"><a href="{{ url_for('spotify_login') }}">Connect with Spotify</a></p>
 
-        {% if not spotify_token %}
-            <p><a href="{{ url_for('spotify_login') }}">Connect with Spotify</a></p>
-        {% else %}
-            <p>Spotify is connected.</p>
-
-            {% if spotify_profile %}
-                <h2>Spotify Profile</h2>
-                <p>Display Name: {{ spotify_profile.display_name }}</p>
-                <p>Email: {{ spotify_profile.email }}</p>
-                
-                {% if spotify_profile.images and spotify_profile.images[0] %}
-                    <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="100" height="100">
-                {% endif %}
-            {% endif %}
-
-            <!-- Active Spotify Users Section -->
-            <h2>Active Spotify Users</h2>
-            {% if active_profiles %}
-                <div id="active-users">
-                    {% for profile in active_profiles %}
-                        <div class="active-user" data-user-id="{{ profile.user_id }}">
-                            {% if profile.image_url %}
-                                <img src="{{ profile.image_url }}" alt="{{ profile.display_name }}" width="50" height="50">
-                            {% else %}
-                                <img src="default_profile.png" alt="Default Profile" width="50" height="50">
-                            {% endif %}
-                            <div>
-                                <p><strong>{{ profile.display_name }}</strong></p>
-                                <p>{{ profile.email }}</p>
-                                <!-- Track Info Placeholder -->
-                                <div class="track-info" id="track-info-{{ profile.user_id }}">
-                                    <p><em>Loading current track...</em></p>  <!-- Updated loading indicator -->
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>No active Spotify users at the moment.</p>
-            {% endif %}
-        {% endif %}
-    {% else %}
-        <h1 id="profileDropDown">Welcome Guest</h1>
-        <p><a href="{{ url_for('login') }}" id="qsLoginBtn">Login</a></p>
-    {% endif %}
+    <h2>Active Spotify Users</h2>
+    <div id="active-users"></div>
 
     <script>
-        // Connect to Socket.IO with explicit server URL
         const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
 
-        // Function to fetch and display track info for each active user
+        // Add user to the list
+        socket.on("add_user", (user) => {
+            const userDiv = document.createElement("div");
+            userDiv.className = "active-user";
+            userDiv.id = `user-${user.user_id}`;
+            userDiv.setAttribute("data-user-id", user.user_id);
+
+            const img = document.createElement("img");
+            img.src = user.image_url || "default_profile.png";
+            img.alt = user.display_name;
+            img.width = 50;
+            img.height = 50;
+
+            const infoDiv = document.createElement("div");
+            infoDiv.innerHTML = `<p><strong>${user.display_name}</strong></p><p>${user.email}</p>`;
+            infoDiv.innerHTML += `<div class="track-info" id="track-info-${user.user_id}"><p><em>Loading current track...</em></p></div>`;
+
+            userDiv.appendChild(img);
+            userDiv.appendChild(infoDiv);
+            document.getElementById("active-users").appendChild(userDiv);
+
+            fetchTrackInfo(user.user_id);
+        });
+
+        // Remove user from the list
+        socket.on("remove_user", (user) => {
+            const userDiv = document.getElementById(`user-${user.user_id}`);
+            if (userDiv) userDiv.remove();
+        });
+
+        // Function to fetch track info for a user
         function fetchTrackInfo(userId) {
             socket.emit('find_tracks', { user_id: userId });
         }
 
-        // Listen for the 'track_info' event and update UI for the specific user
-        socket.on('track_info', (data) => {
-            const userId = data.user_id;
-            const trackInfoDiv = document.getElementById(`track-info-${userId}`);
+        // Update track information for a specific user
+        socket.on("track_info", (data) => {
+            const trackInfoDiv = document.getElementById(`track-info-${data.user_id}`);
 
             if (data.error) {
                 trackInfoDiv.innerHTML = `<p>${data.error}</p>`;
-                console.error("Track info error:", data.error);  // Log error details
             } else {
-                const trackHtml = `
+                trackInfoDiv.innerHTML = `
                     <p><strong>Currently Playing:</strong></p>
                     <p>${data.song_name} - ${data.artist_name}</p>
                     <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
                 `;
-                trackInfoDiv.innerHTML = trackHtml;
             }
-        });
-
-        // Fetch track info for each active user every second
-        document.addEventListener("DOMContentLoaded", () => {
-            const activeUsers = document.querySelectorAll(".active-user");
-
-            activeUsers.forEach(userElement => {
-                const userId = userElement.getAttribute("data-user-id");
-
-                // Set interval to fetch track info every second for each user
-                setInterval(() => {
-                    fetchTrackInfo(userId);
-                }, 1000);
-            });
         });
     </script>
 </body>
