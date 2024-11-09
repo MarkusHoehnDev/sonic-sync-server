@@ -28,7 +28,13 @@
     {% if session %}
         <h1>Welcome {{ session.userinfo.name }}!</h1>
         <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
-        <div><pre>{{ pretty }}</pre></div>
+        <div>
+            <script>
+            function updateUser(){
+                UserIDInterface.getUserID({{ pretty.sub }})
+            }
+            </script>
+            <pre id = "pretty">{{ pretty }}</pre></div>
 
         {% if not spotify_token %}
             <p><a href="{{ url_for('spotify_login') }}">Connect with Spotify</a></p>
