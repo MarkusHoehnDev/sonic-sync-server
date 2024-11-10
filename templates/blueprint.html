@@ -171,6 +171,7 @@
 
                 const songText = document.createElement("p");
                 songText.innerHTML = `<strong>Listening to:</strong> ${user.current_song || 'N/A'}`;
+                songText.style.marginTop = "10px"; // Add margin to avoid intersection
 
                 const albumImg = document.createElement("img");
                 albumImg.src = user.album_image || "default_album.png";
@@ -213,7 +214,7 @@
             } else {
                 songInfoDiv.innerHTML = `
                     <p><strong>Listening to:</strong> ${data.song_name} - ${data.artist_name}</p>
-                    <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
+                    <img src="${data.album_image}" alt="${data.song_name}" width="200" height="200">
                 `;
             }
         });
