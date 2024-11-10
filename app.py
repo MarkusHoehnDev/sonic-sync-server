@@ -168,6 +168,7 @@ def handle_find_tracks(data):
     if user_data and "spotify_token" in user_data:
         spotify_token = user_data["spotify_token"]
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
+        print(response)
         
         if response.ok:
             try:
@@ -222,7 +223,7 @@ def handle_gps_data(data):
     
     # Store the most recent GPS data entry for the user
     user_gps_data[received_user_id] = gps_data_entry
-    print("Received GPS data:", gps_data_entry) # this works for sure but the gps display on front end not working
+    # print("Received GPS data:", gps_data_entry) # this works for sure but the gps display on front end not working
 
 
 if __name__ == "__main__":
