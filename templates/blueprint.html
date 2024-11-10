@@ -196,12 +196,12 @@
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
 
                 const subValue = document.createElement("p");
-                subValue.innerHTML =  user.sub.toString();
+                // subValue.innerHTML =  user.sub.toString();
                 subValue.className = "subval"
 
                 profileInfoDiv.appendChild(img);
                 profileInfoDiv.appendChild(displayName);
-                //profileInfoDiv.appendChild(subValue); 
+                profileInfoDiv.appendChild(subValue); 
 
                 // Song Info
                 const songInfoDiv = document.createElement("div");
@@ -266,23 +266,6 @@
             }
         });
 
-        /*function updateDistanceJSONDisplay(data) {
-            const distanceDataDiv = document.getElementById("distance-data");
-            distanceDataDiv.innerHTML = `
-                <h3>Distance Data</h3>
-                <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
-            `;
-            i = 0
-            userRow.forEach(element => {
-                i++
-                data.forEach(point => {
-
-                    if(point[0] == element.getElementByClassName("subval").innerHTML){
-                        element.getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
-                    }
-                })
-            });
-        }*/
         function updateDistanceJSONDisplay(data) {
             const distanceDataDiv = document.getElementById("distance-data");
             distanceDataDiv.innerHTML = `
