@@ -59,94 +59,84 @@
     <div id="gps-data"></div>
     <script>
         const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
-        const trackInfoCache = {};  // Cache to store last track info by user_id
-    
+
         socket.on("update_active_users", (activeUsers) => {
             const activeUsersDiv = document.getElementById("active-users");
             activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
-    
+
             activeUsers.forEach((user) => {
                 const userDiv = document.createElement("div");
                 userDiv.className = "active-user";
                 userDiv.setAttribute("data-user-id", user.user_id);
-    
+
                 const img = document.createElement("img");
                 img.src = user.image_url || "default_profile.png";
                 img.alt = user.display_name;
                 img.width = 50;
                 img.height = 50;
-    
+
                 const userInfoDiv = document.createElement("div");
-    
+                
                 // Display Name and Sub Value
                 const displayName = document.createElement("p");
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
-    
+                
                 const subValue = document.createElement("p");
                 subValue.innerHTML = `<small>Sub: ${user.sub}</small>`;  // Add sub value here
-    
+                
                 const email = document.createElement("p");
                 email.textContent = user.email;
-    
+
                 const trackInfoDiv = document.createElement("div");
                 trackInfoDiv.className = "track-info";
                 trackInfoDiv.id = `track-info-${user.user_id}`;
-    
+
                 userInfoDiv.appendChild(displayName);
                 userInfoDiv.appendChild(subValue);  // Append the sub value to the user info
                 userInfoDiv.appendChild(email);
                 userInfoDiv.appendChild(trackInfoDiv);
-    
+                
                 userDiv.appendChild(img);
                 userDiv.appendChild(userInfoDiv);
-    
+                
                 activeUsersDiv.appendChild(userDiv);
-    
+
                 setInterval(() => {
                     fetchTrackInfo(user.user_id);
                     sendGPSdata();
                 }, 1000);
             });
         });
-    
+
         function fetchTrackInfo(userId) {
             socket.emit('find_tracks', { user_id: userId });
         }
-    
+
         function updateGPSDisplay(data) {
             const gpsDataDiv = document.getElementById("gps-data");
             gpsDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
         }
-    
+
         function sendGPSdata() {
             socket.emit('send_gps');
         }
-    
+
         socket.on("update_gps", (data) => {
             updateGPSDisplay(data);
         });
-    
+        
         socket.on('track_info', (data) => {
             const trackInfoDiv = document.getElementById(`track-info-${data.user_id}`);
-    
-            // Check if there's a new track or an error
             if (data.error) {
                 trackInfoDiv.innerHTML = `<p>${data.error}</p>`;
-                trackInfoCache[data.user_id] = null;  // Reset cached track for this user
-            } else if (
-                !trackInfoCache[data.user_id] ||
-                trackInfoCache[data.user_id].song_name !== data.song_name
-            ) {
-                // Only update if the track is different
+            } else {
                 trackInfoDiv.innerHTML = `
                     <p><strong>Currently Playing:</strong></p>
                     <p>${data.song_name} - ${data.artist_name}</p>
                     <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
                 `;
-                trackInfoCache[data.user_id] = data;  // Cache current track info
             }
-            // No change if track is the same as cached
         });
-    </script>    
+    </script>
 </body>
 </html>
