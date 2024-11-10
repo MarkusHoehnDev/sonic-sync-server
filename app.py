@@ -66,7 +66,7 @@ def haversine(lat1, lon1, lat2, lon2):
         lat2, lon2: Latitude and longitude of point 2 (in decimal degrees)
         
     Returns:
-        Distance in kilometers between point 1 and point 2.
+        Distance in meters between point 1 and point 2.
     """
     # Convert decimal degrees to radians
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
@@ -79,7 +79,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
     # Radius of Earth in kilometers. Use 3956 for miles
     r = 6371  
-    return c * r
+    return c * r * 1000
 
 @app.route("/")
 def home():
@@ -281,7 +281,7 @@ def handle_gps_data(data):
                 other_gps['latitude'],
                 other_gps['longitude']
             )
-            distances[other_user_id] = round(distance, 2)  # Round to 2 decimal places
+            distances[other_user_id] = distance  # Round to 2 decimal places
 
         # Emit distances to all clients
         print(f"Distances: {distances} from {received_user_id}")
