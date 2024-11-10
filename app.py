@@ -163,7 +163,7 @@ def logout():
             user_id = spotify_profile.get("id")
             if user_id and user_id in active_spotify_users:
                 del active_spotify_users[user_id]
-                socketio.emit("update_active_users", get_active_user_list(), broadcast=True)
+                socketio.emit("update_active_users", get_active_user_list())
 
     session.clear()
     return redirect(
