@@ -125,10 +125,6 @@
             updateGPSDisplay(data);
         });
 
-        socket.on('rate_limit_exceeded', function(data) {
-            alert(data.message);  // Display an alert or handle as needed
-        });
-
         
         socket.on('track_info', (data) => {
             const trackInfoDiv = document.getElementById(`track-info-${data.user_id}`);

@@ -186,7 +186,6 @@ def handle_find_tracks(data):
                 timestamps.popleft()
             if len(timestamps) >= RATE_LIMIT:
                 # Reject the request
-                emit('rate_limit_exceeded', {'message': 'Rate limit exceeded. Please try again later.'})
                 return
             else:
                 timestamps.append(now)
