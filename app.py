@@ -168,7 +168,7 @@ def handle_find_tracks(data):
     if user_data and "spotify_token" in user_data:
         spotify_token = user_data["spotify_token"]
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
-        print(response)
+        # print(response)
         
         if response.ok:
             try:
