@@ -123,10 +123,6 @@
             <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
         </div>
     {% endif %}
-    
-    <div id="gps-data" class="container mt-4">
-        <!-- GPS Data Display -->
-    </div>
 
     <!-- New Div for Distance Data -->
     <div id="distance-data" class="container mt-4">
@@ -253,10 +249,6 @@
 
         function updateGPSDisplay(data) {
             const gpsDataDiv = document.getElementById("gps-data");
-            gpsDataDiv.innerHTML = `
-                <h3>GPS Data</h3>
-                <pre id="pretty">${JSON.stringify(data, null, 2)}</pre>
-            `;
         }
     </script>
 </body>
