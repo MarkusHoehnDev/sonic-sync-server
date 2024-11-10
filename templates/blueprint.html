@@ -289,12 +289,13 @@
                 <h3>Distance Data</h3>
                 <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
             `;
-            const userRows = document.querySelectorAll("profile-row");
+            const userRows = document.querySelectorAll(".profile-row");
             userRows.forEach(element => {
-                const subValue = element.querySelector("subval").innerHTML;
+                const subValue = element.querySelector(".subval").innerHTML;
                 data.distances.forEach(point => {
                     if (point[0].toString() == subValue.toString()) {
-                        element.querySelector("gps-info").innerHTML = "Distance: " + point[1];
+                        element.querySelector(".gps-info").innerHTML = "Distance: " + point[1];
+                        window.alert("im here");
                     }
                 });
             });
