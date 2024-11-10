@@ -294,14 +294,11 @@
             const userRows = document.querySelectorAll(".profile-row");
             userRows.forEach(element => {
                 const subValue = element.querySelector(".subval").innerHTML;
-                data.forEach(point => {
-                    alert(point[0].toString());
-                    alert(subValue.toString());
-                    console.log(`Point: ${point[0]}, SubValue: ${subValue}`);
-                    if (point[0].toString() == subValue.toString()) {
-                        element.querySelector(".gps-info").innerHTML = "Distance: " + point[1];
+                for (const [key, value] of Object.entries(data.distances)) {
+                    if (key === subValue) {
+                        element.querySelector(".gps-info").innerHTML = `Distance: ${value}`;
                     }
-                });
+                }
             });
         }
 
