@@ -208,9 +208,10 @@ def handle_find_tracks(data):
                         "song_name": song_name,
                         "artist_name": artist_name,
                         "album_image": album_image
-                    })
-            except Exception:
-                pass
+                    }, broadcast=True)  # Add broadcast=True here
+            except Exception as e:
+                print(f"Error processing track info: {e}")
+
 
 
 @socketio.on('send_gps')
