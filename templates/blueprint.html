@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonicSync</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #a58b7d; /* Soft brownish color similar to the image */
+            color: white;
+        }
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .header-buttons button {
+            margin: 0 10px;
+            background-color: #333;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .profile-row {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #666;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .profile-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .profile-info, .song-info, .gps-info {
+            flex: 1;
+            text-align: center;
+        }
+        .song-info img {
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .track-info p {
+            margin: 0;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        pre#pretty {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+        }
+    </style>
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    {% if session %}
+        <button class="logout-button"><a href="{{ url_for('logout') }}" style="color: #333;">Logout</a></button>
+        <div class="header-buttons">
+            <button>Profile</button>
+            <button>Status</button>
+        </div>
+
+        <div class="container mt-3">
+            <h1 class="text-center">Welcome {{ session.userinfo.name }}!</h1>
+            <div class="text-center">
+                <script>
+                    UserIDInterface.getUserID("{{ sub }}");
+                </script>            
+                <pre id="pretty">{{ pretty }}</pre>
+            </div>
+            
+            {% if not spotify_token %}
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('spotify_login') }}" class="btn btn-primary">Connect with Spotify</a>
+                </div>
+            {% else %}
+                <div class="text-center mt-3">
+                    <p>Spotify is connected.</p>
+
+                    {% if spotify_profile %}
+                        <h2>Spotify Profile</h2>
+                        <p>Display Name: {{ spotify_profile.display_name }}</p>
+                        <p>Email: {{ spotify_profile.email }}</p>
+                        
+                        {% if spotify_profile.images and spotify_profile.images[0] %}
+                            <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="100" height="100" class="rounded-circle">
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Active Spotify Users Section -->
+                    <h2 class="mt-4">Active Spotify Users</h2>
+                    <div id="active-users" class="mt-3">
+                        <!-- Dynamic User Rows Will Appear Here -->
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <h1 id="profileDropDown" class="text-center mt-5">Welcome Guest</h1>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+        </div>
+    {% endif %}
+    
+    <div id="gps-data" class="container mt-4">
+        <!-- GPS Data Display -->
+    </div>
+
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
+
+        socket.on("update_active_users", (activeUsers) => {
+            const activeUsersDiv = document.getElementById("active-users");
+            activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
+
+            activeUsers.forEach((user) => {
+                const userRow = document.createElement("div");
+                userRow.className = "profile-row";
+                userRow.setAttribute("data-user-id", user.user_id);
+
+                // Profile Info
+                const profileInfoDiv = document.createElement("div");
+                profileInfoDiv.className = "profile-info";
+
+                const img = document.createElement("img");
+                img.src = user.image_url || "default_profile.png";
+                img.alt = user.display_name;
+                img.className = "profile-img";
+
+                const displayName = document.createElement("p");
+                displayName.innerHTML = `<strong>${user.display_name}</strong>`;
+
+                const subValue = document.createElement("p");
+                subValue.innerHTML = `<small>Sub: ${user.sub}</small>`;
+
+                profileInfoDiv.appendChild(img);
+                profileInfoDiv.appendChild(displayName);
+                profileInfoDiv.appendChild(subValue);
+
+                // Song Info
+                const songInfoDiv = document.createElement("div");
+                songInfoDiv.className = "song-info";
+
+                const songText = document.createElement("p");
+                songText.innerHTML = `<strong>Listening to:</strong> ${user.current_song || 'N/A'}`;
+
+                const albumImg = document.createElement("img");
+                albumImg.src = user.album_image || "default_album.png";
+                albumImg.alt = user.current_song || "Album Art";
+                albumImg.width = 100;
+                albumImg.height = 100;
+
+                songInfoDiv.appendChild(songText);
+                songInfoDiv.appendChild(albumImg);
+
+                // GPS Info
+                const gpsInfoDiv = document.createElement("div");
+                gpsInfoDiv.className = "gps-info";
+                gpsInfoDiv.id = `gps-info-${user.user_id}`;
+
+                const gpsText = document.createElement("p");
+                gpsText.innerHTML = `<strong>GPS:</strong> Loading...`;
+
+                gpsInfoDiv.appendChild(gpsText);
+
+                // Append all sections to user row
+                userRow.appendChild(profileInfoDiv);
+                userRow.appendChild(songInfoDiv);
+                userRow.appendChild(gpsInfoDiv);
+
+                activeUsersDiv.appendChild(userRow);
+
+                // Fetch Track Info and GPS Data
+                fetchTrackInfo(user.user_id);
+                setInterval(() => {
+                    fetchTrackInfo(user.user_id);
+                    fetchGPSData(user.user_id, user.sub);
+                }, 5000); // Adjust interval as needed
+            });
+        });
+
+        function fetchTrackInfo(userId) {
+            socket.emit('find_tracks', { user_id: userId });
+        }
+
+        function fetchGPSData(userId, sub) {
+            socket.emit('get_gps', { user_id: userId, sub: sub });
+        }
+
+        socket.on("track_info", (data) => {
+            const songInfoDiv = document.querySelector(`[data-user-id="${data.user_id}"] .song-info`);
+            if (data.error) {
+                songInfoDiv.innerHTML = `<p>${data.error}</p>`;
+            } else {
+                songInfoDiv.innerHTML = `
+                    <p><strong>Listening to:</strong> ${data.song_name} - ${data.artist_name}</p>
+                    <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
+                `;
+            }
+        });
+
+        socket.on("gps_info", (data) => {
+            const gpsInfoDiv = document.getElementById(`gps-info-${data.user_id}`);
+            if (data.error) {
+                gpsInfoDiv.innerHTML = `<p>${data.error}</p>`;
+            } else {
+                gpsInfoDiv.innerHTML = `
+                    <p><strong>GPS:</strong> Latitude: ${data.latitude}, Longitude: ${data.longitude}</p>
+                `;
+            }
+        });
+
+        function updateGPSDisplay(data) {
+            const gpsDataDiv = document.getElementById("gps-data");
+            gpsDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        // Initial GPS Data Fetching if needed
+        function sendGPSdata() {
+            socket.emit('send_gps');
+        }
+
+        socket.on("update_gps", (data) => {
+            updateGPSDisplay(data);
+        });
+    </script>
+</body>
+</html>
