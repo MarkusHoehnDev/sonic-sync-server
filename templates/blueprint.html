@@ -99,22 +99,17 @@
                         <script>
                             function showPopup() {
                                 alert("Profile picture clicked!");
-                                const statusDropdown = document.createElement("select");
-                                statusDropdown.className = "form-control mt-2";
-                                statusDropdown.innerHTML = `
-                                    <option value="happy">Happy</option>
-                                    <option value="sad">Sad</option>
-                                    <option value="excited">Excited</option>
-                                    <option value="relaxed">Relaxed</option>
-                                `;
+                                const statusInput = document.createElement("input");
+                                statusInput.className = "form-control mt-2";
+                                statusInput.placeholder = "Enter your status";
 
                                 const statusLabel = document.createElement("label");
-                                statusLabel.innerHTML = "Select your status:";
+                                statusLabel.innerHTML = "Enter your status:";
                                 statusLabel.className = "mt-2";
 
                                 const popupContent = document.createElement("div");
                                 popupContent.appendChild(statusLabel);
-                                popupContent.appendChild(statusDropdown);
+                                popupContent.appendChild(statusInput);
 
                                 const popup = document.createElement("div");
                                 popup.className = "popup";
@@ -130,10 +125,12 @@
 
                                 document.body.appendChild(popup);
 
-                                statusDropdown.addEventListener("change", function() {
-                                    const selectedStatus = statusDropdown.value;
-                                    alert("Your status is: " + selectedStatus);
-                                    document.body.removeChild(popup);
+                                statusInput.addEventListener("keypress", function(event) {
+                                    if (event.key === "Enter") {
+                                        const enteredStatus = statusInput.value;
+                                        alert("Your status is: " + enteredStatus);
+                                        document.body.removeChild(popup);
+                                    }
                                 });
                             }
                         </script>
