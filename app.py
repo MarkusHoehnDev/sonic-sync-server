@@ -212,13 +212,6 @@ def handle_find_tracks(data):
             except Exception as e:
                 print(f"Error processing track info: {e}")
 
-
-
-@socketio.on('send_gps')
-def handle_send_gps():
-    emit("update_gps", user_gps_data, broadcast=True)
-
-
 @socketio.on('gps_data')
 def handle_gps_data(data):
     """
@@ -250,6 +243,7 @@ def handle_gps_data(data):
     
     # Store the most recent GPS data entry for the user
     user_gps_data[received_user_id] = gps_data_entry
+    emit("update_gps", user_gps_data, broadcast=True)
     # print("Received GPS data:", gps_data_entry) # this works for sure but the gps display on front end not working
 
 

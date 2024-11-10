@@ -245,11 +245,6 @@
             gpsDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
         }
 
-        // Initial GPS Data Fetching if needed
-        function sendGPSdata() {
-            socket.emit('send_gps');
-        }
-
         socket.on("update_gps", (data) => {
             updateGPSDisplay(data);
         });
