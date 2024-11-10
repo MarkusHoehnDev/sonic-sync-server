@@ -91,7 +91,9 @@
         <div class="container mt-3">
             <div class="text-center">
                 <script>
-                    UserIDInterface.getUserID("{{ sub }}");
+                    // Assign the 'sub' value from the backend to a JavaScript variable
+                    const currentUserSub = "{{ sub }}";
+                    UserIDInterface.getUserID(currentUserSub);
                 </script>            
             </div>
             
@@ -223,18 +225,19 @@
             }
         });
 
-        // Removed the previous update_distances handler and updateDistanceDisplay function
-
-        // New Listener for update_distances to display JSON at the bottom
+        // Listen for update_distances to display JSON at the bottom
         socket.on("update_distances", (data) => {
-            updateDistanceJSONDisplay(data);
+            // Check if the current_user_id matches the logged-in user's sub
+            if (data.current_user_id === currentUserSub) {
+                updateDistanceJSONDisplay(data.distances);
+            }
         });
 
-        function updateDistanceJSONDisplay(data) {
+        function updateDistanceJSONDisplay(distances) {
             const distanceDataDiv = document.getElementById("distance-data");
             distanceDataDiv.innerHTML = `
                 <h3>Distance Data</h3>
-                <pre id="distance-pretty">${JSON.stringify(data, null, 2)}</pre>
+                <pre id="distance-pretty">${JSON.stringify(distances, null, 2)}</pre>
             `;
         }
 
