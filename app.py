@@ -168,19 +168,24 @@ def handle_find_tracks(data):
     if user_data and "spotify_token" in user_data:
         spotify_token = user_data["spotify_token"]
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
+        
         if response.ok:
-            track_data = response.json()
-            if track_data and track_data.get("item"):
-                track_info = track_data["item"]
-                song_name = track_info.get("name")
-                artist_name = ", ".join([artist["name"] for artist in track_info.get("artists", [])])
-                album_image = track_info["album"]["images"][0]["url"] if track_info["album"].get("images") else None
-                emit("track_info", {
-                    "user_id": user_id,
-                    "song_name": song_name,
-                    "artist_name": artist_name,
-                    "album_image": album_image
-                })
+            try:
+                track_data = response.json()
+                if track_data and track_data.get("item"):
+                    track_info = track_data["item"]
+                    song_name = track_info.get("name")
+                    artist_name = ", ".join([artist["name"] for artist in track_info.get("artists", [])])
+                    album_image = track_info["album"]["images"][0]["url"] if track_info["album"].get("images") else None
+                    emit("track_info", {
+                        "user_id": user_id,
+                        "song_name": song_name,
+                        "artist_name": artist_name,
+                        "album_image": album_image
+                    })
+            except Exception:
+                pass
+
                 
 
 @socketio.on('gps_data')
