@@ -235,11 +235,11 @@
                 <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
             `;
             i = 0
-            userRow.forEach(element => {
+            document.getElementByID("active-users").forEach(element => {
                 i++
                 data.forEach(point => {
                     if(point[0] == element.getElementById(i + "sub").innerHTML){
-                        userRow.getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
+                        document.getElementById("active-users").getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
                     }
                 })
             });
