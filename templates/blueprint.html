@@ -180,6 +180,7 @@
                 const userRow = document.createElement("div");
                 userRow.className = "profile-row";
                 userRow.setAttribute("data-user-id", user.user_id);
+                userRow.setAttribute("data-sub", user.sub); // Add the sub as a data attribute
 
                 // Profile Info
                 const profileInfoDiv = document.createElement("div");
@@ -195,13 +196,9 @@
                 const displayName = document.createElement("p");
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
 
-                const subValue = document.createElement("p");
-                // subValue.innerHTML =  user.sub.toString();
-                subValue.className = "subval"
-
+                // Append profile info without subValue
                 profileInfoDiv.appendChild(img);
                 profileInfoDiv.appendChild(displayName);
-                profileInfoDiv.appendChild(subValue); 
 
                 // Song Info
                 const songInfoDiv = document.createElement("div");
@@ -274,11 +271,12 @@
             `;
             const userRows = document.querySelectorAll(".profile-row");
             userRows.forEach(element => {
-                const subValue = element.querySelector(".subval").innerHTML;
-                for (const [key, value] of Object.entries(data.distances)) {
-                    if (key === subValue) {
-                        element.querySelector(".gps-info").innerHTML = `Distance: ${value.toFixed(2)} meters`;
-                    }
+                const subValue = element.getAttribute("data-sub"); // Retrieve the sub from data attribute
+                if (subValue && data.distances.hasOwnProperty(subValue)) {
+                    const distance = data.distances[subValue];
+                    element.querySelector(".gps-info").innerHTML = `Distance: ${distance.toFixed(2)} meters`;
+                } else {
+                    element.querySelector(".gps-info").innerHTML = `Distance: N/A`;
                 }
             });
         }
