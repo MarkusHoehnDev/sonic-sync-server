@@ -55,21 +55,32 @@ def home():
     spotify_profile = None
 
     if spotify_token:
-        response = oauth.spotify.get("me", token=spotify_token)
-        if response.ok:
-            spotify_profile = response.json()
-            user_id = spotify_profile.get("id")
-            if user_id:
-                active_spotify_users[user_id] = {
-                    "sub":  user['userinfo']['sub'],
-                    "user_id": user_id,
-                    "display_name": spotify_profile.get("display_name"),
-                    "email": spotify_profile.get("email"),
-                    "image_url": spotify_profile.get("images")[0]["url"] if spotify_profile.get("images") else None,
-                    "last_active": time.time(),
-                    "spotify_token": spotify_token
-                }
-                socketio.emit("update_active_users", get_active_user_list())
+        while True:
+            response = oauth.spotify.get("me", token=spotify_token)
+            
+            # Check if we hit a rate limit
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 60))  # Retry-After is usually in seconds
+                print(f"Rate limit exceeded. Retrying after {retry_after} seconds...")
+                time.sleep(retry_after)
+            elif response.ok:
+                spotify_profile = response.json()
+                user_id = spotify_profile.get("id")
+                if user_id:
+                    active_spotify_users[user_id] = {
+                        "sub": user['userinfo']['sub'],
+                        "user_id": user_id,
+                        "display_name": spotify_profile.get("display_name"),
+                        "email": spotify_profile.get("email"),
+                        "image_url": spotify_profile.get("images")[0]["url"] if spotify_profile.get("images") else None,
+                        "last_active": time.time(),
+                        "spotify_token": spotify_token
+                    }
+                    socketio.emit("update_active_users", get_active_user_list())
+                break  # Exit the loop once successful
+            else:
+                print("Failed to retrieve Spotify profile info.")
+                break
 
     return render_template(
         "home.html",
@@ -79,6 +90,7 @@ def home():
         spotify_profile=spotify_profile,
         sub=user['userinfo']['sub'] if user else None
     )
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -165,27 +177,41 @@ def spotify_callback():
 def handle_find_tracks(data):
     user_id = data.get('user_id')
     user_data = active_spotify_users.get(user_id)
+    
     if user_data and "spotify_token" in user_data:
         spotify_token = user_data["spotify_token"]
-        response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
-        print(response)
-        
-        if response.ok:
-            try:
-                track_data = response.json()
-                if track_data and track_data.get("item"):
-                    track_info = track_data["item"]
-                    song_name = track_info.get("name")
-                    artist_name = ", ".join([artist["name"] for artist in track_info.get("artists", [])])
-                    album_image = track_info["album"]["images"][0]["url"] if track_info["album"].get("images") else None
-                    emit("track_info", {
-                        "user_id": user_id,
-                        "song_name": song_name,
-                        "artist_name": artist_name,
-                        "album_image": album_image
-                    })
-            except Exception:
-                pass
+
+        while True:
+            response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
+            
+            # Check if we hit a rate limit
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 60))  # Retry-After is usually in seconds
+                print(f"Rate limit exceeded. Retrying after {retry_after} seconds...")
+                time.sleep(retry_after)
+            elif response.ok:
+                try:
+                    track_data = response.json()
+                    if track_data and track_data.get("item"):
+                        track_info = track_data["item"]
+                        song_name = track_info.get("name")
+                        artist_name = ", ".join([artist["name"] for artist in track_info.get("artists", [])])
+                        album_image = track_info["album"]["images"][0]["url"] if track_info["album"].get("images") else None
+                        
+                        emit("track_info", {
+                            "user_id": user_id,
+                            "song_name": song_name,
+                            "artist_name": artist_name,
+                            "album_image": album_image
+                        })
+                    break  # Exit the loop once successful
+                except Exception as e:
+                    print("Error processing track data:", e)
+                    break
+            else:
+                print("Failed to retrieve Spotify track info.")
+                break
+
 
 @socketio.on('send_gps')
 def handle_send_gps():
