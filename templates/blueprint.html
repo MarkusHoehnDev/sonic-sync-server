@@ -131,13 +131,13 @@
         socket.on("update_active_users", (activeUsers) => {
             const activeUsersDiv = document.getElementById("active-users");
             activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
-
+            var i = 0
             activeUsers.forEach((user) => {
+                i++
                 // Skip displaying the current user
                 if (user.sub === currentUserSub) {
                     return; // Skip to the next iteration
                 }
-
                 const userRow = document.createElement("div");
                 userRow.className = "profile-row";
                 userRow.setAttribute("data-user-id", user.user_id);
@@ -157,7 +157,9 @@
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
 
                 const subValue = document.createElement("p");
-                //subValue.innerHTML = `<small>Sub: ${user.sub}</small>`;
+              
+                subValue.id = i + "sub"
+                subValue.innerHTML =  ${user.sub}.toString();
 
                 profileInfoDiv.appendChild(img);
                 profileInfoDiv.appendChild(displayName);
@@ -220,16 +222,27 @@
         socket.on("update_distances", (data) => {
             // Check if the current_user_id matches the logged-in user's sub
             if (data.current_user_id === currentUserSub) {
-                updateDistanceJSONDisplay(data.distances);
+                updateDistanceJSONDisplay(data);
             }
         });
 
-        function updateDistanceJSONDisplay(distances) {
+        function updateDistanceJSONDisplay(data) {
             const distanceDataDiv = document.getElementById("distance-data");
             distanceDataDiv.innerHTML = `
                 <h3>Distance Data</h3>
-                <pre id="distance-pretty">${JSON.stringify(distances, null, 2)}</pre>
+                <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
             `;
+            i = 0
+            userRow.forEach(element => {
+                i++
+                data.forEach(point => {
+                    if(point[0] == element.getElementById(i + "sub").innerHTML){
+                        locationText = document.createElement('p')
+                        locationText.innerHTML = data[1]
+                        userRow.appendChild(locationText)
+                    }
+                })
+            });
         }
 
         // Listen for GPS updates to keep local data in sync
