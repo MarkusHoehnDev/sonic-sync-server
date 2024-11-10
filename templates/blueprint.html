@@ -261,8 +261,6 @@
         // Listen for update_distances to display JSON at the bottom
         socket.on("update_distances", (data) => {
             // Check if the current_user_id matches the logged-in user's sub
-            alert("update_distances", data);
-            console.log(data);
             if (data.current_user_id === currentUserSub) {
                 updateDistanceJSONDisplay(data);
             }
