@@ -7,6 +7,7 @@ from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, redirect, render_template, session, url_for, request, make_response, jsonify
 from flask_socketio import SocketIO, emit
+from datetime import datetime
 
 # Load environment variables
 ENV_FILE = find_dotenv()
@@ -19,6 +20,8 @@ app.secret_key = env.get("APP_SECRET_KEY")
 # Initialize SocketIO and OAuth
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", transports=["websocket"])
 oauth = OAuth(app)
+
+lastSpotifyRequest = datetime()
 
 # Register Auth0
 oauth.register(
@@ -53,9 +56,11 @@ def home():
     spotify_token = session.get("spotify_token")
 
     spotify_profile = None
-
     if spotify_token:
+        while((datetime() - lastSpotifyRequest).seconds < 1):
+            pass
         response = oauth.spotify.get("me", token=spotify_token)
+        lastSpotifyRequest = datetime()
         if response.ok:
             spotify_profile = response.json()
             user_id = spotify_profile.get("id")
@@ -167,8 +172,10 @@ def handle_find_tracks(data):
     user_data = active_spotify_users.get(user_id)
     if user_data and "spotify_token" in user_data:
         spotify_token = user_data["spotify_token"]
+        while((datetime() - lastSpotifyRequest).seconds < 1):
+            pass
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
-        
+        lastSpotifyRequest = datetime()
         print(response)
         
         if response.ok:

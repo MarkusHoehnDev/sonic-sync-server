@@ -34,7 +34,7 @@
             }
 
         </script>
-        <p><button id="qsLogoutBtn" onclick="logOut">Logout</button></p>
+        <p><a id="qsLogoutBtn" href="{{ url_for('logout')}}" onclick="logOut">Logout</an></p>
         <div>
             <script>
                 UserIDInterface.getUserID("{{ sub }}");
