@@ -188,6 +188,7 @@
                 gpsInfoDiv.id = `gps-info-${user.user_id}`;
 
                 const gpsText = document.createElement("p");
+                gpsText.className = 'gps-text'
                 gpsText.innerHTML = `Distance: N/A`;
 
                 gpsInfoDiv.appendChild(gpsText);
@@ -235,13 +236,11 @@
                 <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
             `;
             i = 0
-            userRow.forEach(element => {
+            document.getElementByID("active-users").forEach(element => {
                 i++
                 data.forEach(point => {
                     if(point[0] == element.getElementById(i + "sub").innerHTML){
-                        locationText = document.createElement('p')
-                        locationText.innerHTML = data[1]
-                        userRow.appendChild(locationText)
+                        document.getElementById("active-users").getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
                     }
                 })
             });
