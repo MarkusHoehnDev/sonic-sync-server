@@ -196,9 +196,8 @@
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
 
                 const subValue = document.createElement("p");
-              
-                subValue.id = i + "sub"
                 subValue.innerHTML =  user.sub.toString();
+                subValue.className = "subval"
 
                 profileInfoDiv.appendChild(img);
                 profileInfoDiv.appendChild(displayName);
@@ -277,10 +276,9 @@
             userRow.forEach(element => {
                 i++
                 data.forEach(point => {
-                    if(point[0] == element.getElementById(i + "sub").innerHTML){
-                        locationText = document.createElement('p')
-                        locationText.innerHTML = data[1]
-                        userRow.appendChild(locationText)
+
+                    if(point[0] == element.getElementByClassName("subval").innerHTML){
+                        element.getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
                     }
                 })
             });
