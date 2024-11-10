@@ -126,6 +126,11 @@
         <!-- GPS Data Display -->
     </div>
 
+    <!-- New Div for Distance Data -->
+    <div id="distance-data" class="container mt-4">
+        <!-- Distance Data Display -->
+    </div>
+
     <!-- jQuery, Popper.js, and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -133,9 +138,6 @@
     
     <script>
         const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
-
-        // Store distances in a dictionary
-        const userDistances = {};
 
         // Store GPS data locally for potential future use
         let userGpsData = {};
@@ -205,7 +207,6 @@
                 fetchTrackInfo(user.user_id);
                 setInterval(() => {
                     fetchTrackInfo(user.user_id);
-                    fetchGPSData(user.user_id, user.sub);
                 }, 5000); // Adjust interval as needed
             });
         });
@@ -222,59 +223,38 @@
             }
         });
 
-        // Listen for distance updates
+        // Removed the previous update_distances handler and updateDistanceDisplay function
+
+        // New Listener for update_distances to display JSON at the bottom
         socket.on("update_distances", (data) => {
-            const { current_user_id, distances } = data;
-            userDistances[current_user_id] = distances;
-            updateDistanceDisplay(current_user_id, distances);
+            updateDistanceJSONDisplay(data);
         });
 
-        // Function to update distance display for each user row
-        function updateDistanceDisplay(currentUserId, distances) {
-            const activeUsersDiv = document.getElementById("active-users");
-            const currentUserGPS = userGpsData[currentUserId];
-
-            // Iterate through each user row
-            activeUsersDiv.querySelectorAll(".profile-row").forEach((userRow) => {
-                const userId = userRow.getAttribute("data-user-id");
-                const gpsInfoDiv = userRow.querySelector(".gps-info");
-                
-                if (userId === currentUserId) {
-                    gpsInfoDiv.innerHTML = `<p>Distance: N/A (You)</p>`;
-                    return;
-                }
-
-                if (distances && distances[userId] !== undefined) {
-                    gpsInfoDiv.innerHTML = `<p>Distance: ${distances[userId]} km</p>`;
-                } else {
-                    gpsInfoDiv.innerHTML = `<p>Distance: N/A</p>`;
-                }
-            });
+        function updateDistanceJSONDisplay(data) {
+            const distanceDataDiv = document.getElementById("distance-data");
+            distanceDataDiv.innerHTML = `
+                <h3>Distance Data</h3>
+                <pre id="distance-pretty">${JSON.stringify(data, null, 2)}</pre>
+            `;
         }
 
         // Listen for GPS updates to keep local data in sync
         socket.on("update_gps", (data) => {
             userGpsData = data;
+            updateGPSDisplay(data);
         });
 
         function fetchTrackInfo(userId) {
             socket.emit('find_tracks', { user_id: userId });
         }
 
-        function fetchGPSData(userId, sub) {
-            // Implement your GPS data fetching logic here
-            // For example, you might send GPS data to the backend
-            // This function is already handled by the `handle_gps_data` on the backend
-        }
-
         function updateGPSDisplay(data) {
             const gpsDataDiv = document.getElementById("gps-data");
-            gpsDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            gpsDataDiv.innerHTML = `
+                <h3>GPS Data</h3>
+                <pre id="pretty">${JSON.stringify(data, null, 2)}</pre>
+            `;
         }
-
-        socket.on("update_gps", (data) => {
-            updateGPSDisplay(data);
-        });
     </script>
 </body>
 </html>
