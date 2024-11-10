@@ -294,7 +294,7 @@
             const userRows = document.querySelectorAll(".profile-row");
             userRows.forEach(element => {
                 const subValue = element.querySelector(".subval").innerHTML;
-                data.distances.forEach(point => {
+                data.forEach(point => {
                     alert(point[0].toString());
                     alert(subValue.toString());
                     console.log(`Point: ${point[0]}, SubValue: ${subValue}`);
