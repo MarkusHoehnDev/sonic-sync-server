@@ -8,6 +8,16 @@ from dotenv import find_dotenv, load_dotenv
 from flask import Flask, redirect, render_template, session, url_for, request, make_response, jsonify
 from flask_socketio import SocketIO, emit
 
+from collections import defaultdict, deque
+from threading import Lock
+
+RATE_LIMIT = 60  # Maximum number of requests
+TIME_WINDOW = 60  # Time window in seconds
+
+request_timestamps = defaultdict(deque)  # Keeps track of request times per user
+request_timestamps_lock = Lock()  # Ensures thread safety
+
+
 # Load environment variables
 ENV_FILE = find_dotenv()
 if ENV_FILE:
@@ -166,6 +176,22 @@ def handle_find_tracks(data):
     user_id = data.get('user_id')
     user_data = active_spotify_users.get(user_id)
     if user_data and "spotify_token" in user_data:
+        
+        # Rate limiting logic
+        now = time.time()
+        with request_timestamps_lock:
+            timestamps = request_timestamps[user_id]
+            # Remove timestamps outside the time window
+            while timestamps and timestamps[0] <= now - TIME_WINDOW:
+                timestamps.popleft()
+            if len(timestamps) >= RATE_LIMIT:
+                # Reject the request
+                emit('rate_limit_exceeded', {'message': 'Rate limit exceeded. Please try again later.'})
+                return
+            else:
+                timestamps.append(now)
+
+        # Proceed with the Spotify API request
         spotify_token = user_data["spotify_token"]
         response = oauth.spotify.get("me/player/currently-playing", token=spotify_token)
         print(response)
@@ -186,6 +212,7 @@ def handle_find_tracks(data):
                     })
             except Exception:
                 pass
+
 
 @socketio.on('send_gps')
 def handle_send_gps():
