@@ -27,7 +27,14 @@
 <body>
     {% if session %}
         <h1>Welcome {{ session.userinfo.name }}!</h1>
-        <p><a href="{{ url_for('logout') }}" id="qsLogoutBtn">Logout</a></p>
+        <script>
+            function logOut(){
+                UserIDInterface.logOut()
+                window.location.href = "{{ url_for('logout') }}"
+            }
+
+        </script>
+        <p><button id="qsLogoutBtn" onclick="logOut">Logout</button></p>
         <div>
             <script>
                 UserIDInterface.getUserID("{{ sub }}");
