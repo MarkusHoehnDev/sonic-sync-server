@@ -93,7 +93,7 @@
                     {% if spotify_profile %}
                         {% if spotify_profile.images and spotify_profile.images[0] %}
                             <button class="btn btn-link p-0"></button>
-                                <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200px" height="200px" class="rounded-circle profile-img">
+                                <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200" height="200" class="rounded-circle profile-img">
                             </button>
                         {% endif %}
                     {% endif %}
@@ -214,7 +214,7 @@
             } else {
                 songInfoDiv.innerHTML = `
                     <p><strong>Listening to:</strong> ${data.song_name} - ${data.artist_name}</p>
-                    <img src="${data.album_image}" alt="${data.song_name}" width="200" height="200">
+                    <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
                 `;
             }
         });
