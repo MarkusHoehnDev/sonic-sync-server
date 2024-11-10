@@ -92,7 +92,7 @@
             <div class="text-center">
                 <script>
                     // Assign the 'sub' value from the backend to a JavaScript variable
-                    const currentUserSub = "{{ sub|escapejs }}"; // Ensure proper escaping
+                    const currentUserSub = "{{ sub }}";
                     UserIDInterface.getUserID(currentUserSub);
                 </script>            
             </div>
