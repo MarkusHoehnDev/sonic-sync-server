@@ -150,8 +150,8 @@
                 img.src = user.image_url || "default_profile.png";
                 img.alt = user.display_name;
                 img.className = "profile-img";
-                img.style.width = "150px"; // Adjust the width
-                img.style.height = "150px"; // Adjust the height
+                img.style.width = "100px"; // Adjust the width
+                img.style.height = "100px"; // Adjust the height
 
                 const displayName = document.createElement("p");
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
@@ -213,8 +213,9 @@
                 songInfoDiv.innerHTML = `<p>${data.error}</p>`;
             } else {
                 songInfoDiv.innerHTML = `
-                    <p><strong>Listening to:</strong> ${data.song_name} - ${data.artist_name}</p>
+                    <p><strong>Listening to:</strong></p>
                     <img src="${data.album_image}" alt="${data.song_name}" width="100" height="100">
+                    <p>${data.song_name} - ${data.artist_name}</p>
                 `;
             }
         });
