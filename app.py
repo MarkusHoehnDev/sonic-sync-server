@@ -284,6 +284,7 @@ def handle_gps_data(data):
             distances[other_user_id] = round(distance, 2)  # Round to 2 decimal places
 
         # Emit distances to all clients
+        print(f"Distances: {distances} from {received_user_id}")
         emit("update_distances", {
             "current_user_id": received_user_id,
             "distances": distances
