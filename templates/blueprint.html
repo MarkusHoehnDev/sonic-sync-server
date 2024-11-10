@@ -93,7 +93,7 @@
                     {% if spotify_profile %}
                         {% if spotify_profile.images and spotify_profile.images[0] %}
                         <button class="btn btn-link p-0" onclick="showPopup()">
-                            <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200" height="200" class="rounded-circle profile-img" style="width: 200px; height: 200px;">
+                            <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200" height="200" class="rounded-circle profile-img" style="width: 200px; height: 200px; border: none;">
                         </button>
 
                         <script>
