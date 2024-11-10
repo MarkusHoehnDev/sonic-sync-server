@@ -82,7 +82,7 @@ def home():
                 socketio.emit("update_active_users", get_active_user_list())
 
     return render_template(
-        "home.html",
+        "blueprint.html",
         session=user,
         pretty=json.dumps(user, indent=4) if user else None,
         spotify_token=spotify_token,
