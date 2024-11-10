@@ -186,7 +186,10 @@ def handle_find_tracks(data):
             except Exception:
                 pass
 
-                
+@socketio.on('send_gps')
+def handle_send_gps():
+    emit("update_gps", user_gps_data, broadcast=True)
+
 
 @socketio.on('gps_data')
 def handle_gps_data(data):
@@ -209,19 +212,18 @@ def handle_gps_data(data):
     if latitude is None or longitude is None or timestamp is None:
         return
 
-    # Initialize GPS data storage if it does not exist
-    if received_user_id not in user_gps_data:
-        user_gps_data[received_user_id] = []
-
-    # Append GPS data
+    # Update GPS data with the most recent entry for the user
     gps_data_entry = {
         "latitude": latitude,
         "longitude": longitude,
         "timestamp": timestamp,
         "received_user_id": received_user_id
     }
-    user_gps_data[received_user_id].append(gps_data_entry)
-    print("Received GPS data:", gps_data_entry) 
+    
+    # Store the most recent GPS data entry for the user
+    user_gps_data[received_user_id] = gps_data_entry
+    print("Received GPS data:", gps_data_entry)
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))

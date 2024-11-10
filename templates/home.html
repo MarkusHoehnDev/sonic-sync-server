@@ -103,6 +103,7 @@
 
                 setInterval(() => {
                     fetchTrackInfo(user.user_id);
+                    sendGPSdata();
                 }, 1000);
             });
         });
@@ -111,6 +112,19 @@
             socket.emit('find_tracks', { user_id: userId });
         }
 
+        function updateGPSDisplay(data) {
+            const gpsDataDiv = document.getElementById("gps-data");
+            gpsDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function sendGPSdata() {
+            socket.emit('send_gps');
+        }
+
+        socket.on("update_gps", (data) => {
+            updateGPSDisplay(data);
+        });
+        
         socket.on('track_info', (data) => {
             const trackInfoDiv = document.getElementById(`track-info-${data.user_id}`);
             if (data.error) {
