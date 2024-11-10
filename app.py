@@ -222,7 +222,7 @@ def handle_gps_data(data):
     
     # Store the most recent GPS data entry for the user
     user_gps_data[received_user_id] = gps_data_entry
-    print("Received GPS data:", gps_data_entry)
+    print("Received GPS data:", gps_data_entry) # this works for sure but the gps display on front end not working
 
 
 if __name__ == "__main__":
