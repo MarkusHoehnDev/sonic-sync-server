@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- [Your existing head content] -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SonicSync</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* [Your existing styles] */
         body {
             background-color: #a58b7d; /* Soft brownish color similar to the image */
             color: white;
@@ -139,6 +141,12 @@
     <script>
         const socket = io("https://sonic-sync-78daad0a1d18.herokuapp.com", { transports: ["websocket"] });
 
+        // Store distances in a dictionary
+        const userDistances = {};
+
+        // Store GPS data locally for potential future use
+        let userGpsData = {};
+
         socket.on("update_active_users", (activeUsers) => {
             const activeUsersDiv = document.getElementById("active-users");
             activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
@@ -189,7 +197,7 @@
                 gpsInfoDiv.id = `gps-info-${user.user_id}`;
 
                 const gpsText = document.createElement("p");
-                gpsText.innerHTML = `<strong>GPS:</strong> Loading...`;
+                gpsText.innerHTML = `Distance: N/A`;
 
                 gpsInfoDiv.appendChild(gpsText);
 
@@ -209,14 +217,6 @@
             });
         });
 
-        function fetchTrackInfo(userId) {
-            socket.emit('find_tracks', { user_id: userId });
-        }
-
-        function fetchGPSData(userId, sub) {
-            socket.emit('get_gps', { user_id: userId, sub: sub });
-        }
-
         socket.on("track_info", (data) => {
             const songInfoDiv = document.querySelector(`[data-user-id="${data.user_id}"] .song-info`);
             if (data.error) {
@@ -229,16 +229,50 @@
             }
         });
 
-        socket.on("gps_info", (data) => {
-            const gpsInfoDiv = document.getElementById(`gps-info-${data.user_id}`);
-            if (data.error) {
-                gpsInfoDiv.innerHTML = `<p>${data.error}</p>`;
-            } else {
-                gpsInfoDiv.innerHTML = `
-                    <p><strong>GPS:</strong> Latitude: ${data.latitude}, Longitude: ${data.longitude}</p>
-                `;
-            }
+        // Listen for distance updates
+        socket.on("update_distances", (data) => {
+            const { current_user_id, distances } = data;
+            userDistances[current_user_id] = distances;
+            updateDistanceDisplay(current_user_id, distances);
         });
+
+        // Function to update distance display for each user row
+        function updateDistanceDisplay(currentUserId, distances) {
+            const activeUsersDiv = document.getElementById("active-users");
+            const currentUserGPS = userGpsData[currentUserId];
+
+            // Iterate through each user row
+            activeUsersDiv.querySelectorAll(".profile-row").forEach((userRow) => {
+                const userId = userRow.getAttribute("data-user-id");
+                const gpsInfoDiv = userRow.querySelector(".gps-info");
+                
+                if (userId === currentUserId) {
+                    gpsInfoDiv.innerHTML = `<p>Distance: N/A (You)</p>`;
+                    return;
+                }
+
+                if (distances && distances[userId] !== undefined) {
+                    gpsInfoDiv.innerHTML = `<p>Distance: ${distances[userId]} km</p>`;
+                } else {
+                    gpsInfoDiv.innerHTML = `<p>Distance: N/A</p>`;
+                }
+            });
+        }
+
+        // Listen for GPS updates to keep local data in sync
+        socket.on("update_gps", (data) => {
+            userGpsData = data;
+        });
+
+        function fetchTrackInfo(userId) {
+            socket.emit('find_tracks', { user_id: userId });
+        }
+
+        function fetchGPSData(userId, sub) {
+            // Implement your GPS data fetching logic here
+            // For example, you might send GPS data to the backend
+            // This function is already handled by the `handle_gps_data` on the backend
+        }
 
         function updateGPSDisplay(data) {
             const gpsDataDiv = document.getElementById("gps-data");

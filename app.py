@@ -1,5 +1,6 @@
 import json
 import time
+import math
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 
@@ -16,7 +17,6 @@ TIME_WINDOW = 60  # Time window in seconds
 
 request_timestamps = defaultdict(deque)  # Keeps track of request times per user
 request_timestamps_lock = Lock()  # Ensures thread safety
-
 
 # Load environment variables
 ENV_FILE = find_dotenv()
@@ -56,6 +56,30 @@ oauth.register(
 
 user_gps_data = {}
 active_spotify_users = {}  
+
+def haversine(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great-circle distance between two points on the Earth surface.
+    
+    Parameters:
+        lat1, lon1: Latitude and longitude of point 1 (in decimal degrees)
+        lat2, lon2: Latitude and longitude of point 2 (in decimal degrees)
+        
+    Returns:
+        Distance in kilometers between point 1 and point 2.
+    """
+    # Convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula 
+    dlat = lat2 - lat1 
+    dlon = lon2 - lon1 
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a)) 
+
+    # Radius of Earth in kilometers. Use 3956 for miles
+    r = 6371  
+    return c * r
 
 @app.route("/")
 def home():
@@ -139,7 +163,7 @@ def logout():
             user_id = spotify_profile.get("id")
             if user_id and user_id in active_spotify_users:
                 del active_spotify_users[user_id]
-                socketio.emit("update_active_users", get_active_user_list())
+                socketio.emit("update_active_users", get_active_user_list(), broadcast=True)
 
     session.clear()
     return redirect(
@@ -243,9 +267,29 @@ def handle_gps_data(data):
     
     # Store the most recent GPS data entry for the user
     user_gps_data[received_user_id] = gps_data_entry
-    emit("update_gps", user_gps_data, broadcast=True)
-    # print("Received GPS data:", gps_data_entry) # this works for sure but the gps display on front end not working
 
+    # Compute distances if the current user has GPS data
+    current_user_gps = user_gps_data.get(received_user_id)
+    if current_user_gps:
+        distances = {}
+        for other_user_id, other_gps in user_gps_data.items():
+            if other_user_id == received_user_id:
+                continue  # Skip distance to self
+            distance = haversine(
+                current_user_gps['latitude'],
+                current_user_gps['longitude'],
+                other_gps['latitude'],
+                other_gps['longitude']
+            )
+            distances[other_user_id] = round(distance, 2)  # Round to 2 decimal places
+
+        # Emit distances to all clients
+        emit("update_distances", {
+            "current_user_id": received_user_id,
+            "distances": distances
+        }, broadcast=True)
+
+    emit("update_gps", user_gps_data, broadcast=True)
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(env.get("PORT", 3000)))
