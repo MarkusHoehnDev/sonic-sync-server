@@ -61,6 +61,7 @@ def home():
             user_id = spotify_profile.get("id")
             if user_id:
                 active_spotify_users[user_id] = {
+                    "sub":  user['userinfo']['sub'],
                     "user_id": user_id,
                     "display_name": spotify_profile.get("display_name"),
                     "email": spotify_profile.get("email"),
@@ -76,6 +77,7 @@ def home():
         pretty=json.dumps(user, indent=4) if user else None,
         spotify_token=spotify_token,
         spotify_profile=spotify_profile,
+        sub=user['userinfo']['sub'] if user else None
     )
 
 @socketio.on('connect')
@@ -96,7 +98,8 @@ def get_active_user_list():
             "user_id": uid,
             "display_name": profile["display_name"],
             "email": profile["email"],
-            "image_url": profile["image_url"]
+            "image_url": profile["image_url"],
+            "sub": profile["sub"]
         }
         for uid, profile in active_spotify_users.items()
     ]
@@ -209,7 +212,8 @@ def handle_gps_data(data):
     gps_data_entry = {
         "latitude": latitude,
         "longitude": longitude,
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "received_user_id": received_user_id
     }
     user_gps_data[received_user_id].append(gps_data_entry)
     print("Received GPS data:", gps_data_entry) 
