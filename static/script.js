@@ -36,7 +36,7 @@ var currentUserId //TODO: grab the current user ID somehow
                 setInterval(() => {
                     fetchTrackInfo(user.user_id);
                     sendGPSdata();
-                }, 1000);
+                }, 5000);
             });
         });
 
