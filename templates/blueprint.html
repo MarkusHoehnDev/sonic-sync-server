@@ -296,7 +296,7 @@
                 const subValue = element.querySelector(".subval").innerHTML;
                 for (const [key, value] of Object.entries(data.distances)) {
                     if (key === subValue) {
-                        element.querySelector(".gps-info").innerHTML = `Distance: ${value}`;
+                        element.querySelector(".gps-info").innerHTML = `Distance: ${value.toFixed(2)} meters`;
                     }
                 }
             });
