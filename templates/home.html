@@ -34,8 +34,7 @@
                     UserIDInterface.getUserID("{{ sub }}");
                 }
             </script>            
-            <pre id = "pretty">{{ pretty }}</pre></div>
-
+            <pre id = "pretty" onload="updateUser">{{ pretty }}</pre></div>
         {% if not spotify_token %}
             <p><a href="{{ url_for('spotify_login') }}">Connect with Spotify</a></p>
         {% else %}
