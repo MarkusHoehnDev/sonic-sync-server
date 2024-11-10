@@ -266,7 +266,7 @@
             }
         });
 
-        function updateDistanceJSONDisplay(data) {
+        /*function updateDistanceJSONDisplay(data) {
             const distanceDataDiv = document.getElementById("distance-data");
             distanceDataDiv.innerHTML = `
                 <h3>Distance Data</h3>
@@ -281,6 +281,22 @@
                         element.getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
                     }
                 })
+            });
+        }*/
+        function updateDistanceJSONDisplay(data) {
+            const distanceDataDiv = document.getElementById("distance-data");
+            distanceDataDiv.innerHTML = `
+                <h3>Distance Data</h3>
+                <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
+            `;
+            const userRows = document.querySelectorAll(".profile-row");
+            userRows.forEach(element => {
+                const subValue = element.querySelector(".subval").innerHTML;
+                data.distances.forEach(point => {
+                    if (point[0] === subValue) {
+                        element.querySelector(".gps-info p").innerHTML = "Distance: " + point[1];
+                    }
+                });
             });
         }
 
