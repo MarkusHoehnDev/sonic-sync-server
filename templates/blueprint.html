@@ -151,11 +151,6 @@
         </div>
     {% endif %}
 
-    <!-- New Div for Distance Data -->
-    <div id="distance-data" class="container mt-4">
-        <!-- Distance Data Display -->
-    </div>
-
     <!-- jQuery, Popper.js, and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -264,11 +259,6 @@
         });
 
         function updateDistanceJSONDisplay(data) {
-            const distanceDataDiv = document.getElementById("distance-data");
-            distanceDataDiv.innerHTML = `
-                <h3>Distance Data</h3>
-                <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
-            `;
             const userRows = document.querySelectorAll(".profile-row");
             userRows.forEach(element => {
                 const subValue = element.getAttribute("data-sub"); // Retrieve the sub from data attribute
