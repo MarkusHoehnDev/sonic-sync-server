@@ -7,108 +7,100 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #2c3e50; /* A mellow dark blue-gray color */
-            color: white; /* Optional: sets the text color to white for better contrast */
-        }
-        .list-group-item {
-            background-color: #333; /* Optional: darker background for list items */
+            background-color: #a58b7d; /* Soft brownish color similar to the image */
             color: white;
+        }
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .header-buttons button {
+            margin: 0 10px;
+            background-color: #333;
             border: none;
-            padding: 1rem 0;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 50%;
         }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 0;
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
         }
-        p {
-            font-size: 0.9rem;
+        .profile-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #666;
+        }
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .profile-info, .song-info, .distance-info {
+            flex: 1;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="d-flex justify-content-end mb-4 pr-3">
-        <div class="d-flex align-items-center">
-            <img src="assets/Logo-Photoroom.png" class="img-fluid mr-3" alt="Logo" style="max-width: 100px;">
-            <h1>Campus Companion</h1>
-        </div>
+    <button class="logout-button">Log-out</button>
+    <div class="header-buttons">
+        <button>Profile</button>
+        <button>Status</button>
     </div>
-    <div class="container mt-5">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-md-3 text-center">
-                        <img src="profile.jpg" class="img-fluid rounded-circle" alt="Profile Picture">
-                        <p>Profile Name</p>
-                    </div>
-                    <div class="col-md-9">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img src="album1.jpg" class="img-fluid" alt="Album 1">
-                                <p>Song Title 1</p>
-                                <p>Artist 1</p>
-                                <p>Album 1</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-md-3 text-center">
-                        <img src="profile.jpg" class="img-fluid rounded-circle" alt="Profile Picture">
-                        <p>Profile Name</p>
-                    </div>
-                    <div class="col-md-9">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img src="album2.jpg" class="img-fluid" alt="Album 2">
-                                <p>Song Title 2</p>
-                                <p>Artist 2</p>
-                                <p>Album 2</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-md-3 text-center">
-                        <img src="profile.jpg" class="img-fluid rounded-circle" alt="Profile Picture">
-                        <p>Profile Name</p>
-                    </div>
-                    <div class="col-md-9">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img src="album3.jpg" class="img-fluid" alt="Album 3">
-                                <p>Song Title 3</p>
-                                <p>Artist 3</p>
-                                <p>Album 3</p>
-                                <style>
-                                    .img-fluid {
-                                        max-width: 50%; /* Adjust the percentage as needed */
-                                        height: auto;
-                                    }
-                                    .text-right {
-                                        display: flex;
-                                        justify-content: flex-end;
-                                        align-items: center;
-                                    }
-                                    .text-right img {
-                                        margin-left: 10px; /* Adjust the spacing as needed */
-                                    }
-                                </style>
-                                <style>
-                                    .img-fluid {
-                                        max-width: 50%; /* Adjust the percentage as needed */
-                                        height: auto;
-                                    }
-                                </style>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
-        </ul>
+
+    <div class="container mt-3">
+        <!-- Profile Row 1 -->
+        <div class="profile-row">
+            <div class="profile-info">
+                <img src="profile1.jpg" class="profile-img" alt="Profile Picture">
+                <p>Status: Doing something...</p>
+            </div>
+            <div class="song-info">
+                <p>Listening to: Song Title 1</p>
+            </div>
+            <div class="distance-info">
+                <p>Distance: 10 ft</p>
+            </div>
+        </div>
+        
+        <!-- Profile Row 2 -->
+        <div class="profile-row">
+            <div class="profile-info">
+                <img src="profile2.jpg" class="profile-img" alt="Profile Picture">
+                <p>Status: Doing something else...</p>
+            </div>
+            <div class="song-info">
+                <p>Listening to: Song Title 2</p>
+            </div>
+            <div class="distance-info">
+                <p>Distance: 20 ft</p>
+            </div>
+        </div>
+        
+        <!-- Profile Row 3 -->
+        <div class="profile-row">
+            <div class="profile-info">
+                <img src="profile3.jpg" class="profile-img" alt="Profile Picture">
+                <p>Status: Another activity...</p>
+            </div>
+            <div class="song-info">
+                <p>Listening to: Song Title 3</p>
+            </div>
+            <div class="distance-info">
+                <p>Distance: 30 ft</p>
+            </div>
+        </div>
+        
+        <!-- Additional rows can be added similarly -->
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
