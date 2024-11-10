@@ -99,6 +99,42 @@
                         <script>
                             function showPopup() {
                                 alert("Profile picture clicked!");
+                                const statusDropdown = document.createElement("select");
+                                statusDropdown.className = "form-control mt-2";
+                                statusDropdown.innerHTML = `
+                                    <option value="happy">Happy</option>
+                                    <option value="sad">Sad</option>
+                                    <option value="excited">Excited</option>
+                                    <option value="relaxed">Relaxed</option>
+                                `;
+
+                                const statusLabel = document.createElement("label");
+                                statusLabel.innerHTML = "Select your status:";
+                                statusLabel.className = "mt-2";
+
+                                const popupContent = document.createElement("div");
+                                popupContent.appendChild(statusLabel);
+                                popupContent.appendChild(statusDropdown);
+
+                                const popup = document.createElement("div");
+                                popup.className = "popup";
+                                popup.style.position = "fixed";
+                                popup.style.top = "50%";
+                                popup.style.left = "50%";
+                                popup.style.transform = "translate(-50%, -50%)";
+                                popup.style.backgroundColor = "white";
+                                popup.style.padding = "20px";
+                                popup.style.borderRadius = "10px";
+                                popup.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+                                popup.appendChild(popupContent);
+
+                                document.body.appendChild(popup);
+
+                                statusDropdown.addEventListener("change", function() {
+                                    const selectedStatus = statusDropdown.value;
+                                    alert("Your status is: " + selectedStatus);
+                                    document.body.removeChild(popup);
+                                });
                             }
                         </script>
                         {% endif %}
