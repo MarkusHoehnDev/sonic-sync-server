@@ -157,9 +157,8 @@
                 displayName.innerHTML = `<strong>${user.display_name}</strong>`;
 
                 const subValue = document.createElement("p");
-              
-                subValue.id = i + "sub"
                 subValue.innerHTML =  user.sub.toString();
+                subValue.className = "subval"
 
                 profileInfoDiv.appendChild(img);
                 profileInfoDiv.appendChild(displayName);
@@ -238,8 +237,8 @@
             document.getElementByID("active-users").forEach(element => {
                 i++
                 data.forEach(point => {
-                    if(point[0] == element.getElementById(i + "sub").innerHTML){
-                        document.getElementById("active-users").getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
+                    if(point[0] == element.getElementByClassName("subval").innerHTML){
+                        element.getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
                     }
                 })
             });
