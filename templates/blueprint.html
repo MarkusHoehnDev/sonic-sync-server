@@ -92,7 +92,7 @@
             <div class="text-center">
                 <script>
                     // Assign the 'sub' value from the backend to a JavaScript variable
-                    const currentUserSub = "{{ sub }}";
+                    const currentUserSub = "{{ sub|escapejs }}"; // Ensure proper escaping
                     UserIDInterface.getUserID(currentUserSub);
                 </script>            
             </div>
@@ -145,6 +145,11 @@
             activeUsersDiv.innerHTML = "";  // Clear previous entries to avoid duplication
 
             activeUsers.forEach((user) => {
+                // Skip displaying the current user
+                if (user.sub === currentUserSub) {
+                    return; // Skip to the next iteration
+                }
+
                 const userRow = document.createElement("div");
                 userRow.className = "profile-row";
                 userRow.setAttribute("data-user-id", user.user_id);
@@ -249,6 +254,7 @@
 
         function updateGPSDisplay(data) {
             const gpsDataDiv = document.getElementById("gps-data");
+            // Implement GPS display logic as needed
         }
     </script>
 </body>
