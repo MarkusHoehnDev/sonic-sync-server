@@ -95,6 +95,15 @@
                             <button class="btn btn-link p-0"></button>
                                 <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200" height="200" class="rounded-circle profile-img" style="width: 200px; height: 200px;">
                             </button>
+                        <button class="btn btn-link p-0" onclick="showPopup()">
+                            <img src="{{ spotify_profile.images[0].url }}" alt="Spotify Profile Picture" width="200" height="200" class="rounded-circle profile-img" style="width: 200px; height: 200px;">
+                        </button>
+
+                        <script>
+                            function showPopup() {
+                                alert("Profile picture clicked!");
+                            }
+                        </script>
                         {% endif %}
                     {% endif %}
                     <!-- Active Spotify Users Section -->
@@ -188,7 +197,6 @@
                 gpsInfoDiv.id = `gps-info-${user.user_id}`;
 
                 const gpsText = document.createElement("p");
-                gpsText.className = 'gps-text'
                 gpsText.innerHTML = `Distance: N/A`;
 
                 gpsInfoDiv.appendChild(gpsText);
@@ -236,11 +244,13 @@
                 <pre id="distance-pretty">${JSON.stringify(data.distances, null, 2)}</pre>
             `;
             i = 0
-            document.getElementByID("active-users").forEach(element => {
+            userRow.forEach(element => {
                 i++
                 data.forEach(point => {
                     if(point[0] == element.getElementById(i + "sub").innerHTML){
-                        document.getElementById("active-users").getElementByClassName("gps-text").innerHTML = "Distance: " + element[0]
+                        locationText = document.createElement('p')
+                        locationText.innerHTML = data[1]
+                        userRow.appendChild(locationText)
                     }
                 })
             });
