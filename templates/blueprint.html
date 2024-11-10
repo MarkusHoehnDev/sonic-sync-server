@@ -261,6 +261,8 @@
         // Listen for update_distances to display JSON at the bottom
         socket.on("update_distances", (data) => {
             // Check if the current_user_id matches the logged-in user's sub
+            warning.alert("update_distances", data);
+            console.log(data);
             if (data.current_user_id === currentUserSub) {
                 updateDistanceJSONDisplay(data);
             }
@@ -295,6 +297,7 @@
                 data.distances.forEach(point => {
                     window.alert(point[0].toString());
                     window.alert(subValue.toString());
+                    console.log(`Point: ${point[0]}, SubValue: ${subValue}`);
                     if (point[0].toString() == subValue.toString()) {
                         element.querySelector(".gps-info").innerHTML = "Distance: " + point[1];
                     }
